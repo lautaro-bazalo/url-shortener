@@ -62,7 +62,7 @@ func (s *Server) newGinHandler() *gin.Engine {
 func (s *Server) ListenAndServe() {
 	s.log.Info("starting server on port " + s.config.Port)
 	if err := s.server.ListenAndServe(); err != nil {
-		s.log.Warn("server stopped [%s]", zap.Error(err))
+		s.log.Warn("server stopped", zap.String("error", err.Error()))
 	}
 
 }

@@ -19,6 +19,7 @@ func NewSession(config config.Database, logger *zap.Logger) *Session {
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", config.User, config.Password, config.Host, config.Port, config.Name)
 
+	logger.Info(fmt.Sprintf("connecting to mysql [%s:%d]", config.Host, config.Port))
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
