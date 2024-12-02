@@ -1,0 +1,16 @@
+{
+  "app":{
+    "port":"8080"
+  },
+  "db":{
+    "host":"127.0.0.1",
+    "port":3306,
+    "user":"root",
+    "password": "secret",
+    "name": "url_shortener"
+  },
+  "cache":{
+    "host":"127.0.0.1",
+    "port":6379
+  }
+}

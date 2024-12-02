@@ -3,9 +3,11 @@
         "port":"9290"
     },
     "db":{  
-        "host":"127.0.0.1",
+        "host":"db",
         "port":3306,
-        "user":"root"
+        "user":"root",
+        "password": "root",
+        "name": "url_shortener"
     },
     "cache":{
         "host":"127.0.0.1",

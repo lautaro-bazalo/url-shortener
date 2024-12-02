@@ -6,14 +6,14 @@ import (
 )
 
 type Config struct {
-	App      App   `json:"app"`
-	Database DB    `json:"db"`
-	Cache    Cache `json:"cache"`
+	App      App      `json:"app"`
+	Database Database `json:"db"`
+	Cache    Cache    `json:"cache"`
 }
 type App struct {
 	Port string `json:"port"`
 }
-type DB struct {
+type Database struct {
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
 	User     string `json:"user"`
@@ -28,8 +28,17 @@ type Cache struct {
 
 func ReadFromFile() (*Config, error) {
 	var config *Config
+	var path string
 
-	bytes, err := os.ReadFile("/app/config/config.json")
+	env := os.Getenv("environment")
+
+	if env == "local" {
+		path = "./internal/config/config.json"
+	} else {
+		path = "/app/config/config.json"
+	}
+
+	bytes, err := os.ReadFile(path)
 
 	if err != nil {
 		return nil, err
@@ -40,13 +49,4 @@ func ReadFromFile() (*Config, error) {
 	}
 
 	return config, nil
-}
-
-func readEnvVars(config *Config) *Config {
-
-	pass := os.Getenv("DB_PASSWORD")
-
-	config.Database.Password = pass
-
-	return config
 }
