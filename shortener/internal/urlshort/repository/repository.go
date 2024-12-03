@@ -3,20 +3,23 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"shortener/internal/urlshort/model"
 )
 
 type Resposiotry struct {
-	gorm *gorm.DB
-	log  *zap.Logger
+	gorm  *gorm.DB
+	log   *zap.Logger
+	cache *redis.Client
 }
 
-func NewRepository(db *gorm.DB, logger *zap.Logger) *Resposiotry {
+func NewRepository(db *gorm.DB, logger *zap.Logger, cache *redis.Client) *Resposiotry {
 	return &Resposiotry{
-		gorm: db,
-		log:  logger,
+		gorm:  db,
+		log:   logger,
+		cache: cache,
 	}
 }
 
@@ -34,6 +37,7 @@ func (r *Resposiotry) GetShortURL(url *model.URL) (*model.URL, error) {
 }
 
 func (r *Resposiotry) CreateShortURL(url *model.URL) (*model.URL, error) {
+
 	err := r.gorm.Transaction(func(tx *gorm.DB) error {
 		return tx.Create(url).Error
 	})

@@ -22,8 +22,10 @@ type Database struct {
 }
 
 type Cache struct {
-	Host string `json:"host"`
-	Port int    `json:"port"`
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Password string `json:"password"`
+	DB       int    `json:"db"`
 }
 
 func ReadFromFile() (*Config, error) {

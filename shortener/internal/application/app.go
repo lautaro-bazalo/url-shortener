@@ -1,9 +1,11 @@
 package application
 
 import (
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"os"
 	"os/signal"
+	cache "shortener/internal/cache"
 	"shortener/internal/config"
 	"shortener/internal/server"
 	"shortener/internal/storage"
@@ -17,6 +19,7 @@ type App struct {
 	Session *storage.Session
 	Server  *server.Server
 	Logger  *zap.Logger
+	Cache   *redis.Client
 }
 
 func NewApp() *App {
@@ -35,7 +38,9 @@ func NewApp() *App {
 
 	session := storage.NewSession(config.Database, logger)
 
-	repository := repository.NewRepository(session.Database, logger)
+	cacheClient := cache.CacheClient(config.Cache, logger)
+
+	repository := repository.NewRepository(session.Database, logger, cacheClient)
 
 	urlUsecase := usecase.NewURLUsecase(repository, logger)
 
@@ -48,6 +53,7 @@ func NewApp() *App {
 	return &App{
 		Session: session,
 		Server:  server,
+		Cache:   cacheClient,
 	}
 
 }
@@ -63,4 +69,9 @@ func (a *App) Run() {
 	if err := a.Session.CloseDB(); err != nil {
 		a.Logger.Error("failed to close session", zap.Error(err))
 	}
+
+	if err := a.Cache.Close(); err != nil {
+		a.Logger.Error("failed to close cache", zap.Error(err))
+	}
+
 }
