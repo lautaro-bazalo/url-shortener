@@ -7,7 +7,7 @@
     "port":3306,
     "user":"root",
     "password": "secret",
-    "name": "url_shortener"
+    "name": "url-shortener"
   },
   "cache":{
     "host":"127.0.0.1",

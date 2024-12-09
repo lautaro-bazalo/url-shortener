@@ -5,16 +5,23 @@ import (
 	"shortener/internal/urlshort/model"
 )
 
-func ToApi(url *model.URL) *api.URL {
-	return &api.URL{
-		Original: url.OriginalURL,
-		Short:    url.ShortURL,
+const host = "https://me.li/"
+
+func ToModel(url *api.URL) *model.URL {
+	if len(url.RequestURL) == api.MinValidationLengthValue {
+		return &model.URL{
+			OriginalURL: url.RequestURL,
+		}
+	}
+
+	return &model.URL{
+		ShortURL: url.RequestURL,
 	}
 }
 
-func ToModel(url *api.URL) *model.URL {
-	return &model.URL{
-		OriginalURL: url.Original,
-		ShortURL:    url.Short,
+func ToApi(url *model.URL) *api.URLResponse {
+	return &api.URLResponse{
+		OriginalURL: url.OriginalURL,
+		ShortURL:    host + url.ShortURL,
 	}
 }

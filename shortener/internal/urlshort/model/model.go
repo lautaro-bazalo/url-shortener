@@ -7,3 +7,7 @@ type URL struct {
 	ShortURL    string `gorm:"column:short_url"`
 	OriginalURL string `gorm:"column:original_url;uniqueIndex"`
 }
+
+func (URL) TableName() string {
+	return "url"
+}
