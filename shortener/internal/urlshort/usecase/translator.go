@@ -8,7 +8,7 @@ import (
 const host = "https://me.li/"
 
 func ToModel(url *api.URL) *model.URL {
-	if len(url.RequestURL) == api.MinValidationLengthValue {
+	if len(url.RequestURL) > api.MinValidationLengthValue {
 		return &model.URL{
 			OriginalURL: url.RequestURL,
 		}

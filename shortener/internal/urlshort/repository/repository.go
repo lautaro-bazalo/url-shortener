@@ -32,7 +32,7 @@ func (r *Resposiotry) GetShortURL(c context.Context, url *model.URL) (*model.URL
 
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			r.log.Warn("Not found in the cache for:", zap.String("url", url.OriginalURL), zap.Error(err))
+			r.log.Warn("Not found in the cache", zap.String("url", url.OriginalURL), zap.Error(err))
 		}
 	} else {
 		url.OriginalURL = value
@@ -40,11 +40,11 @@ func (r *Resposiotry) GetShortURL(c context.Context, url *model.URL) (*model.URL
 	}
 
 	err = r.gorm.Transaction(func(tx *gorm.DB) error {
-		tx.Find(url)
 		return tx.Find(url).Error
 	})
 
 	if err != nil {
+		r.gorm.Rollback()
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("I couldn't find a shortened url for: %s", url.ShortURL)
 		}
@@ -70,17 +70,18 @@ func (r *Resposiotry) CreateShortURL(c context.Context, url *model.URL) (*model.
 	})
 
 	if err != nil {
+		r.gorm.Rollback()
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return nil, fmt.Errorf("already exist a url short for the url:  %s", url.OriginalURL)
 		}
-		return nil, fmt.Errorf("I couldn't storage url for %s: %s", url.OriginalURL, err)
+		return nil, fmt.Errorf("I couldn't storage the url %s: %s", url.OriginalURL, err)
 	}
-	if err := r.cache.Set(c, url.OriginalURL, url, 0).Err(); err != nil {
-		r.log.Warn("couldn't store the shortener url for", zap.String("url", url.OriginalURL), zap.Error(err))
+	if err := r.cache.Set(c, url.OriginalURL, url.ShortURL, 0).Err(); err != nil {
+		r.log.Warn("couldn't store the original shortener", zap.String("url", url.OriginalURL), zap.Error(err))
 	}
 
-	if err = r.cache.Set(c, url.ShortURL, url, 0).Err(); err != nil {
-		r.log.Warn("couldn't store the shortener url for", zap.String("url", url.OriginalURL), zap.Error(err))
+	if err = r.cache.Set(c, url.ShortURL, url.OriginalURL, 0).Err(); err != nil {
+		r.log.Warn("couldn't store the shortener", zap.String("url", url.OriginalURL), zap.Error(err))
 	}
 
 	return url, nil
@@ -106,7 +107,7 @@ func (r *Resposiotry) DeleteShortURL(c context.Context, url *model.URL) error {
 }
 
 func (r *Resposiotry) GetOriginalURL(c context.Context, url *model.URL) (*model.URL, error) {
-	URLQuery := strings.Split(url.OriginalURL, "/")
+	URLQuery := strings.Split(url.ShortURL, "/")
 
 	url.ShortURL = URLQuery[len(URLQuery)-1]
 	value, err := r.cache.Get(c, url.ShortURL).Result()
