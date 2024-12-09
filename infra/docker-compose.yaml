@@ -1,5 +1,5 @@
 services:
-  api1:
+  app1:
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,7 +10,7 @@ services:
       - cache
     volumes:
       - ./app-data/:/app/data
-  api2:
+  app2:
     build:
       context: .
       dockerfile: Dockerfile
@@ -69,8 +69,8 @@ services:
     volumes:
       - ./nginx-data.conf:/etc/nginx-data/nginx-data.conf:ro
     depends_on:
-      - api1
-      - api2
+      - app1
+      - app2
 
 volumes:
   db_data:
